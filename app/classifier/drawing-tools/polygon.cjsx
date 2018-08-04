@@ -47,10 +47,14 @@ module.exports = createReactClass
 
   componentDidMount: ->
     document.addEventListener 'mousemove', @handleMouseMove
+    document.addEventListener 'undo', @handleUndo
+    document.addEventListener 'redo', @handleRedo
     document.onkeydown = @handleKeydown
 
   componentWillUnmount: ->
     document.removeEventListener 'mousemove', @handleMouseMove
+    document.removeEventListener 'undo', @handleUndo
+    document.removeEventListener 'redo', @handleRedo
 
   render: ->
     averageScale = (@props.scale.horizontal + @props.scale.vertical) / 2
@@ -125,23 +129,34 @@ module.exports = createReactClass
       mouseWithinViewer: mouseWithinViewer
 
   handleKeydown: (e) ->
-    if e.key == 'u'
-      if @props.mark.points.length > 1
-        document.addEventListener 'mousemove', @handleMouseMove
-        @props.mark.redos.push {
-          point: @props.mark.points.pop()
-          closed: @props.mark.closed
-          inProgress: @props.mark._inProgress
-		}
-        @props.mark.closed = false
-        @props.mark._inProgress = true
-    if e.key == 'r' and @props.mark.redos.length > 0
+    e.preventDefault()
+    e.stopPropagation()
+    cmd = e.ctrlKey or e.metaKey
+    if cmd and e.which == 90 and not e.shiftKey
+      @handleUndo()
+    if (cmd and e.which == 89) or (cmd and e.which == 90 and e.shiftKey)
+      @handleRedo()
+	
+
+  handleUndo: ->
+    if @props.mark.points.length > 1
+      document.addEventListener 'mousemove', @handleMouseMove
+      @props.mark.redos.push {
+        point: @props.mark.points.pop()
+        closed: @props.mark.closed
+        inProgress: @props.mark._inProgress
+      }
+      @props.mark.closed = false
+      @props.mark._inProgress = true
+    @props.onChange @props.mark
+
+  handleRedo: ->
+    if @props.mark.redos.length > 0
       itm = @props.mark.redos.pop()
       @props.mark.points.push(itm.point)
       @props.mark.closed = itm.closed
       @props.mark._inProgress = itm.inProgress
-
-    @props.onChange @props.mark
+      @props.onChange @props.mark
 
   handleFinishClick: ->
     document.removeEventListener 'mousemove', @handleMouseMove
