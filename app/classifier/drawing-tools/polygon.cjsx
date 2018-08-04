@@ -21,7 +21,6 @@ module.exports = createReactClass
     defaultValues: ({x, y}) ->
       points: []
       closed: false
-      redos: []
 
     initStart: ({x, y}, mark) ->
       mark.points.push {x, y}
@@ -46,6 +45,7 @@ module.exports = createReactClass
       mouseWithinViewer: true
 
   componentDidMount: ->
+    @redos = []
     document.addEventListener 'mousemove', @handleMouseMove
     document.onkeydown = @handleKeydown
 
@@ -137,7 +137,7 @@ module.exports = createReactClass
   handleUndo: ->
     if @props.mark.points.length > 1
       document.addEventListener 'mousemove', @handleMouseMove
-      @props.mark.redos.push {
+      @redos.push {
         point: @props.mark.points.pop()
         closed: @props.mark.closed
         inProgress: @props.mark._inProgress
@@ -147,8 +147,8 @@ module.exports = createReactClass
     @props.onChange @props.mark
 
   handleRedo: ->
-    if @props.mark.redos.length > 0
-      itm = @props.mark.redos.pop()
+    if @redos.length > 0
+      itm = @redos.pop()
       @props.mark.points.push(itm.point)
       @props.mark.closed = itm.closed
       @props.mark._inProgress = itm.inProgress
