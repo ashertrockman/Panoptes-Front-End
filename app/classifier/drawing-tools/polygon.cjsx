@@ -21,6 +21,7 @@ module.exports = createReactClass
     defaultValues: ({x, y}) ->
       points: []
       closed: false
+      redos: []
 
     initStart: ({x, y}, mark) ->
       mark.points.push {x, y}
@@ -46,6 +47,7 @@ module.exports = createReactClass
 
   componentDidMount: ->
     document.addEventListener 'mousemove', @handleMouseMove
+    document.onkeydown = @handleKeydown
 
   componentWillUnmount: ->
     document.removeEventListener 'mousemove', @handleMouseMove
@@ -121,6 +123,25 @@ module.exports = createReactClass
       mouseX: newCoord.x
       mouseY: newCoord.y
       mouseWithinViewer: mouseWithinViewer
+
+  handleKeydown: (e) ->
+    if e.key == 'u'
+      if @props.mark.points.length > 1
+        document.addEventListener 'mousemove', @handleMouseMove
+        @props.mark.redos.push {
+          point: @props.mark.points.pop()
+          closed: @props.mark.closed
+          inProgress: @props.mark._inProgress
+		}
+        @props.mark.closed = false
+        @props.mark._inProgress = true
+    if e.key == 'r' and @props.mark.redos.length > 0
+      itm = @props.mark.redos.pop()
+      @props.mark.points.push(itm.point)
+      @props.mark.closed = itm.closed
+      @props.mark._inProgress = itm.inProgress
+
+    @props.onChange @props.mark
 
   handleFinishClick: ->
     document.removeEventListener 'mousemove', @handleMouseMove
