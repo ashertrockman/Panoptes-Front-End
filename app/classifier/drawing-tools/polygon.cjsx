@@ -47,14 +47,10 @@ module.exports = createReactClass
 
   componentDidMount: ->
     document.addEventListener 'mousemove', @handleMouseMove
-    document.addEventListener 'undo', @handleUndo
-    document.addEventListener 'redo', @handleRedo
     document.onkeydown = @handleKeydown
 
   componentWillUnmount: ->
     document.removeEventListener 'mousemove', @handleMouseMove
-    document.removeEventListener 'undo', @handleUndo
-    document.removeEventListener 'redo', @handleRedo
 
   render: ->
     averageScale = (@props.scale.horizontal + @props.scale.vertical) / 2
