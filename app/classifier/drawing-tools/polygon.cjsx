@@ -12,17 +12,18 @@ BUFFER = 16
 
 DELETE_BUTTON_WEIGHT = 5 # Weight of the second point.
 
-module.exports = createReactClass
+Polygon = module.exports = createReactClass
   displayName: 'PolygonTool'
   statics:
     initCoords: null
+    redos: []
 
     defaultValues: ({x, y}) ->
       points: []
       closed: false
 
     initStart: ({x, y}, mark) ->
-      mark.redos = []
+      Polygon.redos = []
       mark.points.push {x, y}
       points: mark.points
       _inProgress: true
@@ -47,6 +48,7 @@ module.exports = createReactClass
   componentDidMount: ->
     document.addEventListener 'mousemove', @handleMouseMove
     document.onkeydown = @handleKeydown
+    redos = []
 
   componentWillUnmount: ->
     document.removeEventListener 'mousemove', @handleMouseMove
@@ -136,7 +138,7 @@ module.exports = createReactClass
   handleUndo: ->
     if @props.mark.points.length > 1
       document.addEventListener 'mousemove', @handleMouseMove
-      @props.mark.redos.push {
+      Polygon.redos.push {
         point: @props.mark.points.pop()
         closed: @props.mark.closed
         inProgress: @props.mark._inProgress
@@ -146,8 +148,8 @@ module.exports = createReactClass
     @props.onChange @props.mark
 
   handleRedo: ->
-    if @props.mark.redos.length > 0
-      itm = @props.mark.redos.pop()
+    if Polygon.redos.length > 0
+      itm = Polygon.redos.pop()
       @props.mark.points.push(itm.point)
       @props.mark.closed = itm.closed
       @props.mark._inProgress = itm.inProgress
